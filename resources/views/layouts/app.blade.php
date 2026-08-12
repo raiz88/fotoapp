@@ -71,6 +71,12 @@
                 <ul class="menu-nav">
                     <li class="menu-title">MENU</li>
                     <li class="menu-item">
+                        <a href="{{ route('dashboard') }}" class="menu-link">
+                            <i class="ri-dashboard-2-line"></i>
+                            <span class="menu-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="menu-item">
                         <a href="{{ route('bookings.index') }}" class="menu-link">
                             <i class="ri-calendar-check-line"></i>
                             <span class="menu-text">Booking List</span>

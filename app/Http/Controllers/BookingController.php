@@ -7,6 +7,47 @@ use Illuminate\Http\Request;
 
 class BookingController extends Controller
 {
+    public function dashboard()
+    {
+        $today = now()->startOfDay();
+        $statusCounts = collect(Booking::STATUSES)->mapWithKeys(function ($status) {
+            return [$status => Booking::where('status', $status)->count()];
+        });
+
+        $upcomingBookings = Booking::whereDate('booking_date', '>=', $today)
+            ->where('status', '!=', 'cancelled')
+            ->orderBy('booking_date')
+            ->orderBy('booking_time')
+            ->limit(5)
+            ->get();
+
+        $months = collect(range(5, 0))->map(function ($monthsAgo) {
+            $date = now()->subMonths($monthsAgo);
+            return [
+                'label' => $date->format('M Y'),
+                'start' => $date->copy()->startOfMonth(),
+                'end'  => $date->copy()->endOfMonth(),
+            ];
+        });
+
+        $monthlyBookings = $months->map(function ($month) {
+            return Booking::whereBetween('booking_date', [$month['start'], $month['end']])->count();
+        });
+
+        $totalRevenue = Booking::whereIn('status', ['confirmed', 'completed'])->sum('price');
+
+        return view('dashboard', [
+            'totalBookings' => Booking::count(),
+            'upcomingCount' => Booking::whereDate('booking_date', '>=', $today)
+                ->where('status', '!=', 'cancelled')->count(),
+            'statusCounts' => $statusCounts,
+            'upcomingBookings' => $upcomingBookings,
+            'monthLabels' => $months->pluck('label'),
+            'monthlyBookings' => $monthlyBookings,
+            'totalRevenue' => $totalRevenue,
+        ]);
+    }
+
     public function index()
     {
         $bookings = Booking::orderBy('booking_date', 'desc')->get();
