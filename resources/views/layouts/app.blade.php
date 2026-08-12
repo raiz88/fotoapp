@@ -8,10 +8,43 @@
     <meta content="Fotographer Booking Management" name="description" />
     <link rel="shortcut icon" href="{{ asset('velzon/assets/images/favicon.ico') }}" />
     <script src="{{ asset('velzon/assets/js/layout.js') }}"></script>
+    <script>
+        (function () {
+            const browserTheme = window.matchMedia('(prefers-color-scheme: dark)');
+            const applyTheme = (theme) => {
+                const dark = theme === 'dark' || (theme === 'system' && browserTheme.matches);
+                document.documentElement.setAttribute('data-layout-mode', dark ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-sidebar', dark ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-topbar', dark ? 'dark' : 'light');
+            };
+            window.fotographerTheme = localStorage.getItem('fotographer-theme') || 'system';
+            applyTheme(window.fotographerTheme);
+            browserTheme.addEventListener?.('change', () => {
+                if (window.fotographerTheme === 'system') applyTheme('system');
+            });
+            window.applyFotographerTheme = (theme) => {
+                window.fotographerTheme = theme;
+                localStorage.setItem('fotographer-theme', theme);
+                applyTheme(theme);
+            };
+        })();
+    </script>
     <link href="{{ asset('velzon/assets/css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('velzon/assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('velzon/assets/css/app.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('velzon/assets/css/custom.min.css') }}" rel="stylesheet" type="text/css" />
+    <style>
+        .fotographer-brand { color: var(--vz-heading-color); font-size: 20px; font-weight: 700; letter-spacing: -.06em; text-decoration: none; }
+        [data-layout-mode="dark"] .fotographer-brand { color: #fff; }
+        .fotographer-brand:hover { color: var(--vz-primary); }
+        .theme-picker { position:fixed; left:18px; bottom:18px; z-index:1100; }
+        .theme-picker-toggle { width:40px; height:40px; border:1px solid var(--vz-border-color); border-radius:50%; color:var(--vz-body-color); background:var(--vz-card-bg-custom); box-shadow:0 4px 16px rgba(30,32,37,.14); cursor:pointer; transition:all .2s; }
+        .theme-picker-toggle:hover { color:var(--vz-primary); transform:translateY(-2px); }
+        .theme-picker-menu { display:none; position:absolute; left:0; bottom:49px; width:145px; padding:6px; border:1px solid var(--vz-border-color); border-radius:9px; background:var(--vz-card-bg-custom); box-shadow:0 8px 24px rgba(30,32,37,.16); }
+        .theme-picker.open .theme-picker-menu { display:block; }
+        .theme-option { display:flex; align-items:center; gap:8px; width:100%; border:0; border-radius:6px; padding:8px 10px; color:var(--vz-body-color); background:transparent; font-size:13px; text-align:left; cursor:pointer; }
+        .theme-option:hover, .theme-option.active { color:var(--vz-primary); background:var(--vz-light); }
+    </style>
     @stack('css')
 </head>
 
@@ -25,13 +58,8 @@
                 <div class="navbar-header">
                     <div class="d-flex">
                         <div class="navbar-brand-box horizontal-logo">
-                            <a href="{{ route('bookings.index') }}" class="logo logo-dark">
-                                <span class="logo-sm">
-                                    <img src="{{ asset('velzon/assets/images/logo-sm.png') }}" alt="" height="22">
-                                </span>
-                                <span class="logo-lg">
-                                    <img src="{{ asset('velzon/assets/images/logo-dark.png') }}" alt="" height="17">
-                                </span>
+                            <a href="{{ url('/') }}" class="fotographer-brand">
+                                fotographer
                             </a>
                         </div>
                         <button type="button" class="btn btn-sm px-3 fs-16 header-item vertical-menu-btn topnav-hamburger" id="topnav-hamburger-icon">
@@ -58,13 +86,8 @@
         <!-- ========== App Menu ========== -->
         <div class="app-menu navbar-menu">
             <div class="navbar-brand-box">
-                <a href="{{ route('bookings.index') }}" class="logo logo-dark">
-                    <span class="logo-sm">
-                        <img src="{{ asset('velzon/assets/images/logo-sm.png') }}" alt="" height="22">
-                    </span>
-                    <span class="logo-lg">
-                        <img src="{{ asset('velzon/assets/images/logo-dark.png') }}" alt="" height="17">
-                    </span>
+                <a href="{{ url('/') }}" class="fotographer-brand">
+                    fotographer
                 </a>
             </div>
             <div class="scrollbar">
@@ -141,6 +164,15 @@
     </div>
     <!-- END layout-wrapper -->
 
+    <div class="theme-picker" id="theme-picker">
+        <div class="theme-picker-menu" role="menu" aria-label="Theme options">
+            <button class="theme-option" data-theme="system" type="button"><i class="ri-computer-line"></i> System</button>
+            <button class="theme-option" data-theme="light" type="button"><i class="ri-sun-line"></i> Light</button>
+            <button class="theme-option" data-theme="dark" type="button"><i class="ri-moon-line"></i> Dark</button>
+        </div>
+        <button class="theme-picker-toggle" id="theme-picker-toggle" type="button" aria-label="Change theme" aria-expanded="false"><i class="ri-contrast-2-line"></i></button>
+    </div>
+
     <!-- Vendor Scripts -->
     <script src="{{ asset('velzon/assets/libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('velzon/assets/libs/simplebar/simplebar.min.js') }}"></script>
@@ -149,6 +181,28 @@
     <script src="{{ asset('velzon/assets/js/pages/plugins/lord-icon-2.1.0.js') }}"></script>
     <script src="{{ asset('velzon/assets/js/plugins.js') }}"></script>
     <script src="{{ asset('velzon/assets/js/app.js') }}"></script>
+    <script>
+        (function () {
+            const picker = document.getElementById('theme-picker');
+            const toggle = document.getElementById('theme-picker-toggle');
+            const options = document.querySelectorAll('.theme-option');
+            const refreshActive = () => options.forEach(option => option.classList.toggle('active', option.dataset.theme === window.fotographerTheme));
+            toggle.addEventListener('click', () => {
+                const open = picker.classList.toggle('open');
+                toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                refreshActive();
+            });
+            options.forEach(option => option.addEventListener('click', () => {
+                window.applyFotographerTheme(option.dataset.theme);
+                refreshActive();
+                picker.classList.remove('open');
+                toggle.setAttribute('aria-expanded', 'false');
+            }));
+            document.addEventListener('click', event => {
+                if (!picker.contains(event.target)) picker.classList.remove('open');
+            });
+        })();
+    </script>
     @stack('scripts')
 
 </body>
