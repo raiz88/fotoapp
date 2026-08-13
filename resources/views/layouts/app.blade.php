@@ -34,7 +34,8 @@
     <link href="{{ asset('velzon/assets/css/app.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('velzon/assets/css/custom.min.css') }}" rel="stylesheet" type="text/css" />
     <style>
-        .fotographer-brand { color: var(--vz-heading-color); font-size: 20px; font-weight: 700; letter-spacing: -.06em; text-decoration: none; }
+        .fotographer-brand { color: var(--vz-heading-color); font-size: 16px; font-weight: 700; letter-spacing: .01em; text-decoration: none; }
+        .fotographer-brand small { color: var(--vz-secondary-color); font-size: 9px; font-weight: 500; letter-spacing: .16em; margin-left: 6px; text-transform: uppercase; }
         [data-layout-mode="dark"] .fotographer-brand { color: #fff; }
         .fotographer-brand:hover { color: var(--vz-primary); }
         .theme-picker { position:fixed; left:18px; bottom:18px; z-index:1100; }
@@ -44,6 +45,12 @@
         .theme-picker.open .theme-picker-menu { display:block; }
         .theme-option { display:flex; align-items:center; gap:8px; width:100%; border:0; border-radius:6px; padding:8px 10px; color:var(--vz-body-color); background:transparent; font-size:13px; text-align:left; cursor:pointer; }
         .theme-option:hover, .theme-option.active { color:var(--vz-primary); background:var(--vz-light); }
+        .app-primary-nav { display:flex; align-items:center; gap:22px; margin-left:28px; font-size:12px; text-transform:uppercase; letter-spacing:.06em; }
+        .app-primary-nav a { color:var(--vz-body-color); text-decoration:none; opacity:.72; transition:all .2s; }
+        .app-primary-nav a:hover, .app-primary-nav a.active { color:var(--vz-primary); opacity:1; }
+        .app-primary-nav .app-nav-cta { color:#fff; opacity:1; background:var(--vz-primary); padding:9px 14px; border-radius:999px; }
+        [data-layout-mode="dark"] .app-primary-nav .app-nav-cta { color:#10131a; }
+        @media (max-width: 900px) { .app-primary-nav { display:none; } }
     </style>
     @stack('css')
 </head>
@@ -59,7 +66,7 @@
                     <div class="d-flex">
                         <div class="navbar-brand-box horizontal-logo">
                             <a href="{{ url('/') }}" class="fotographer-brand">
-                                fotographer
+                                LENS & LIGHT <small>fotographer</small>
                             </a>
                         </div>
                         <button type="button" class="btn btn-sm px-3 fs-16 header-item vertical-menu-btn topnav-hamburger" id="topnav-hamburger-icon">
@@ -69,6 +76,13 @@
                         </button>
                     </div>
                     <div class="d-flex align-items-center">
+                        <nav class="app-primary-nav" aria-label="Primary navigation">
+                            <a href="{{ url('/') }}">Home</a>
+                            <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
+                            <a href="{{ route('bookings.calendar') }}" class="{{ request()->routeIs('bookings.calendar') ? 'active' : '' }}">Calendar</a>
+                            <a href="{{ route('bookings.index') }}" class="{{ request()->routeIs('bookings.index') ? 'active' : '' }}">Booking List</a>
+                            <a href="{{ route('bookings.create') }}" class="app-nav-cta">New Booking <i class="ri-arrow-right-up-line align-middle"></i></a>
+                        </nav>
                         <div class="dropdown d-inline-block ms-2">
                             <button type="button" class="btn header-item" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="ri-user-3-line fs-18"></i>
@@ -87,12 +101,12 @@
         <div class="app-menu navbar-menu">
             <div class="navbar-brand-box">
                 <a href="{{ url('/') }}" class="fotographer-brand">
-                    fotographer
+                    LENS & LIGHT <small>fotographer</small>
                 </a>
             </div>
             <div class="scrollbar">
                 <ul class="menu-nav">
-                    <li class="menu-title">MENU</li>
+                    <li class="menu-title">STUDIO</li>
                     <li class="menu-item">
                         <a href="{{ route('dashboard') }}" class="menu-link">
                             <i class="ri-dashboard-2-line"></i>
