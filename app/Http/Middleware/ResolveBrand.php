@@ -32,6 +32,12 @@ class ResolveBrand
             ->where(fn ($q) => $q->where('domain', $lookupHost)->orWhere('dev_domain', $lookupHost))
             ->first();
 
+        // Local Laravel servers commonly run on 127.0.0.1 or localhost,
+        // while seeded brands use their own *.localhost dev domains.
+        if (! $brand && app()->environment('local') && in_array($host, ['127.0.0.1', 'localhost'])) {
+            $brand = Brand::where('is_active', true)->orderBy('id')->first();
+        }
+
         if (! $brand) {
             abort(404);
         }
