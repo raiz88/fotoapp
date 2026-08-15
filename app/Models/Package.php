@@ -60,6 +60,17 @@ class Package extends Model
         return $this->deposit_percent ?? $this->brand->deposit_percent;
     }
 
+    /**
+     * A flat deposit (deposit_fixed_cents) takes priority over the
+     * percent-based deposit when a package has one set.
+     */
+    public function depositLabel(): string
+    {
+        return $this->deposit_fixed_cents
+            ? $this->deposit_fixed_cents->format()
+            : $this->depositPercent().'%';
+    }
+
     public function whatsappMessage(): string
     {
         return "Saya berminat dengan {$this->name} ({$this->price_cents->format()}).";

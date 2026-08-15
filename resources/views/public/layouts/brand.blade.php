@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ms" data-brand="{{ $brand->code }}">
+<html lang="{{ app()->getLocale() }}" data-brand="{{ $brand->code }}">
 
 <head>
     <meta charset="utf-8" />
@@ -26,6 +26,7 @@
     </style>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @stack('scripts')
 </head>
 
 <body class="min-h-screen bg-ink text-fg/80 antialiased selection:bg-brand-primary/30">
@@ -40,19 +41,18 @@
             </a>
 
             <nav class="hidden items-center gap-8 text-sm font-medium text-fg/70 md:flex">
-                <a href="{{ route('home') }}" class="transition hover:text-fg">Laman Utama</a>
-                <a href="{{ route('packages.index') }}" class="transition hover:text-fg">Pakej</a>
-                <a href="{{ route('gallery') }}" class="transition hover:text-fg">Galeri</a>
-                <a href="{{ route('contact') }}" class="transition hover:text-fg">Hubungi</a>
+                <a href="#packages" class="transition hover:text-fg">Packages</a>
+                <a href="#gallery" class="transition hover:text-fg">Gallery</a>
+                <a href="#contact" class="transition hover:text-fg">Contact</a>
+                <a href="#booking" class="transition hover:text-fg">Book Now</a>
             </nav>
 
-            <a href="{{ $brand->whatsappUrl('Hai ' . $brand->name . ', saya nak tanya tentang pakej.') }}"
-               target="_blank" rel="noopener"
+            <a href="#booking"
                class="hidden rounded-full bg-brand-primary px-5 py-2 text-sm font-semibold text-black shadow-[0_0_30px_-8px_var(--brand-primary)] transition hover:brightness-110 md:inline-block">
-                WhatsApp Kami
+                Book Now
             </a>
 
-            <button id="nav-toggle" class="text-fg md:hidden" aria-label="Buka menu">
+            <button id="nav-toggle" class="text-fg md:hidden" aria-label="Open menu">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
@@ -60,12 +60,11 @@
         </div>
 
         <nav id="nav-menu" class="hidden border-t border-fg/5 px-4 py-3 text-fg/80 md:hidden">
-            <a href="{{ route('home') }}" class="block py-2">Laman Utama</a>
-            <a href="{{ route('packages.index') }}" class="block py-2">Pakej</a>
-            <a href="{{ route('gallery') }}" class="block py-2">Galeri</a>
-            <a href="{{ route('contact') }}" class="block py-2">Hubungi</a>
-            <a href="{{ $brand->whatsappUrl('Hai ' . $brand->name . ', saya nak tanya tentang pakej.') }}" class="mt-2 block rounded-full bg-brand-primary px-4 py-2 text-center font-semibold text-black">
-                WhatsApp Kami
+            <a href="#packages" class="block py-2">Packages</a>
+            <a href="#gallery" class="block py-2">Gallery</a>
+            <a href="#contact" class="block py-2">Contact</a>
+            <a href="#booking" class="mt-2 block rounded-full bg-brand-primary px-4 py-2 text-center font-semibold text-black">
+                Book Now
             </a>
         </nav>
     </header>
@@ -82,32 +81,36 @@
                     <p class="mt-2">{{ $brand->tagline }}</p>
                 </div>
                 <div>
-                    <p class="font-semibold text-fg/80">Hubungi Kami</p>
+                    <p class="font-semibold text-fg/80">Contact</p>
                     @if ($brand->whatsapp_number)
                         <p class="mt-2">WhatsApp: {{ $brand->whatsapp_number }}</p>
                     @endif
                     @if ($brand->instagram_handle)
-                        <p>Instagram: @{{ $brand->instagram_handle }}</p>
+                        <p>Instagram: {{ '@'.$brand->instagram_handle }}</p>
+                    @endif
+                    @if ($brand->tiktok_handle)
+                        <p>TikTok: {{ '@'.$brand->tiktok_handle }}</p>
                     @endif
                     @if ($brand->address)
                         <p>{{ $brand->address }}</p>
                     @endif
                 </div>
                 <div>
-                    <p class="font-semibold text-fg/80">Pautan</p>
-                    <p class="mt-2"><a href="{{ route('packages.index') }}" class="transition hover:text-brand-primary">Semua Pakej</a></p>
-                    <p><a href="{{ route('contact') }}" class="transition hover:text-brand-primary">Hubungi</a></p>
+                    <p class="font-semibold text-fg/80">Links</p>
+                    <p class="mt-2"><a href="#packages" class="transition hover:text-brand-primary">Packages</a></p>
+                    <p><a href="#gallery" class="transition hover:text-brand-primary">Gallery</a></p>
+                    <p><a href="#contact" class="transition hover:text-brand-primary">Contact</a></p>
+                    <p><a href="#booking" class="transition hover:text-brand-primary">Book Now</a></p>
                 </div>
             </div>
             <p class="mt-10 text-xs text-fg/30">&copy; {{ date('Y') }} {{ $brand->legal_name ?? $brand->name }}</p>
         </div>
     </footer>
 
-    <a href="{{ $brand->whatsappUrl('Hai ' . $brand->name . ', saya nak tanya tentang pakej.') }}"
-       target="_blank" rel="noopener"
-       class="fixed bottom-5 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-fg shadow-lg md:hidden"
-       aria-label="WhatsApp">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-7 w-7" fill="currentColor"><path d="M12 2C6.5 2 2 6.5 2 12c0 1.9.5 3.6 1.4 5.2L2 22l4.9-1.3C8.4 21.5 10.1 22 12 22c5.5 0 10-4.5 10-10S17.5 2 12 2zm0 18c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3 .8.8-2.9-.2-.3C4.4 15 4 13.5 4 12c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8z"/></svg>
+    <a href="#booking"
+       class="fixed bottom-5 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-brand-primary text-black shadow-[0_0_30px_-8px_var(--brand-primary)] md:hidden"
+       aria-label="Book Now">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18"/><path stroke-linecap="round" d="M9 16l2 2 4-4"/></svg>
     </a>
 </body>
 
