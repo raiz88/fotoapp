@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'toyyibpay' => [
+        'secret_key' => env('TOYYIBPAY_SECRET_KEY'),
+        'category_code' => env('TOYYIBPAY_CATEGORY_CODE'),
+        // Sandbox by default (no live merchant account yet) — switch to
+        // https://toyyibpay.com in production once one is approved.
+        'base_url' => env('TOYYIBPAY_BASE_URL', 'https://dev.toyyibpay.com'),
+    ],
+
 ];

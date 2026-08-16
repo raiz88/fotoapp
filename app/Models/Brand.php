@@ -15,7 +15,7 @@ class Brand extends Model
         'document_prefix', 'booking_mode', 'primary_color', 'secondary_color',
         'logo_path', 'logo_dark_path', 'favicon_path', 'og_image_path',
         'mail_from_name', 'mail_from_address', 'reply_to_address',
-        'whatsapp_number', 'instagram_handle',
+        'whatsapp_number', 'instagram_handle', 'tiktok_handle',
         'bank_name', 'bank_account_no', 'bank_account_holder', 'duitnow_qr_path',
         'quotation_validity_days', 'payment_hold_hours', 'lead_days', 'deposit_percent',
         'default_terms', 'address', 'business_reg_no', 'is_active',
@@ -36,6 +36,11 @@ class Brand extends Model
     public function addons(): HasMany
     {
         return $this->hasMany(Addon::class);
+    }
+
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
     }
 
     /**

@@ -19,113 +19,87 @@ class PackageSeeder extends Seeder
     {
         $brand = Brand::where('code', 'ceritaconvo')->firstOrFail();
 
-        $asas = Package::updateOrCreate(
-            ['brand_id' => $brand->id, 'slug' => 'pakej-asas'],
+        // Superseded by the real 2-package lineup below (CeritaConvo is a
+        // solo photographer — this used to model a 3-tier studio business
+        // that never existed).
+        Package::where('brand_id', $brand->id)
+            ->whereIn('slug', ['pakej-asas', 'pakej-premium', 'pakej-eksklusif'])
+            ->get()
+            ->each(fn (Package $p) => $p->addons()->detach());
+        Package::where('brand_id', $brand->id)
+            ->whereIn('slug', ['pakej-asas', 'pakej-premium', 'pakej-eksklusif'])
+            ->delete();
+        Addon::where('brand_id', $brand->id)
+            ->whereIn('code', ['extra-foto-10', 'album-tambahan', 'extra-pax', 'drone-shot', 'tambahan-30-minit'])
+            ->delete();
+
+        $personal = Package::updateOrCreate(
+            ['brand_id' => $brand->id, 'slug' => 'photoshoot-personal'],
             [
-                'name' => 'Pakej Asas',
-                'tier' => 'basic',
-                'tagline' => 'Untuk yang nak simpan kenangan konvo tanpa berbelanja besar',
-                'description' => 'Sesi bergambar konvokesyen ringkas di studio dengan backdrop pilihan.',
-                'price_cents' => 35000,
-                'duration_minutes' => 30,
+                'name' => 'Photoshoot Personal',
+                'tier' => null,
+                'tagline' => 'Preconvo/postconvo — a personal photographer for you & your family',
+                'description' => null,
+                'price_cents' => 33000,
+                'deposit_fixed_cents' => 5000,
+                'cover_image_path' => 'images/packages/photoshoot-personal.jpg',
+                'duration_minutes' => 60,
                 'session_slots_required' => 1,
-                'max_pax' => 2,
-                'edited_photos_count' => 15,
-                'delivery_days' => 7,
+                'max_pax' => null,
+                'edited_photos_count' => null,
+                'delivery_days' => 21,
                 'is_active' => true,
-                'is_featured' => false,
+                'is_featured' => true,
                 'sort_order' => 1,
                 'published_at' => now(),
             ]
         );
-        $this->items($asas, [
-            ['1 sesi bergambar (30 minit)', false],
-            ['15 keping gambar edit', true],
-            ['Softcopy resolusi tinggi', false],
-            ['1 backdrop studio pilihan', false],
-            ['Album cetak', false, false],
+        $this->items($personal, [
+            ['1 hour coverage', false],
+            ['Shoot and edit', true],
+            ['Unlimited photos', true],
+            ['Best edited photos', true],
+            ['Delivered via Google Photos', false],
         ]);
 
-        $premium = Package::updateOrCreate(
-            ['brand_id' => $brand->id, 'slug' => 'pakej-premium'],
+        $grouping = Package::updateOrCreate(
+            ['brand_id' => $brand->id, 'slug' => 'grouping'],
             [
-                'name' => 'Pakej Premium',
-                'tier' => 'silver',
-                'tagline' => 'Pilihan popular — lebih gambar, ada album cetak',
-                'description' => 'Sesi konvo lebih lengkap dengan album cetak dan lebih banyak gambar edit.',
-                'price_cents' => 55000,
-                'was_price_cents' => 65000,
-                'duration_minutes' => 45,
+                'name' => 'Grouping',
+                'tier' => null,
+                'tagline' => 'Preconvo/postconvo — group photos, priced per head',
+                'description' => "3-5 people: RM120/head (1 hour 30 minutes coverage).\n6 people and above: RM90/head (2 hours coverage).",
+                'price_cents' => 9000,
+                'price_note' => 'RM120/head (3-5 people) · RM90/head (6+ people)',
+                'deposit_fixed_cents' => 5000,
+                'cover_image_path' => 'images/packages/grouping.jpg',
+                'duration_minutes' => null,
                 'session_slots_required' => 1,
-                'max_pax' => 4,
-                'edited_photos_count' => 30,
-                'delivery_days' => 7,
+                'max_pax' => null,
+                'edited_photos_count' => null,
+                'delivery_days' => 21,
                 'is_active' => true,
-                'is_featured' => true,
+                'is_featured' => false,
                 'sort_order' => 2,
                 'published_at' => now(),
             ]
         );
-        $this->items($premium, [
-            ['1 sesi bergambar (45 minit)', false],
-            ['30 keping gambar edit', true],
-            ['Album cetak 8R (20 muka surat)', true],
-            ['Softcopy resolusi tinggi', false],
-            ['2 backdrop studio pilihan', false],
-            ['Props konvo percuma', false],
+        $this->items($grouping, [
+            ['Shoot and edit', true],
+            ['Unlimited photos', true],
+            ['Best edited photos', true],
+            ['Delivered via Google Photos', false],
+            ['Transportation included', false, false],
         ]);
 
-        $eksklusif = Package::updateOrCreate(
-            ['brand_id' => $brand->id, 'slug' => 'pakej-eksklusif'],
-            [
-                'name' => 'Pakej Eksklusif',
-                'tier' => 'gold',
-                'tagline' => 'Liputan penuh indoor + outdoor untuk hari besar anda',
-                'description' => 'Dua sesi (studio dan outdoor kampus) dengan album premium.',
-                'price_cents' => 85000,
-                'duration_minutes' => 90,
-                'session_slots_required' => 2,
-                'max_pax' => 6,
-                'edited_photos_count' => 50,
-                'delivery_days' => 10,
-                'is_active' => true,
-                'is_featured' => false,
-                'sort_order' => 3,
-                'published_at' => now(),
-            ]
-        );
-        $this->items($eksklusif, [
-            ['2 sesi bergambar (studio + outdoor kampus)', false],
-            ['50 keping gambar edit', true],
-            ['Album premium kulit (30 muka surat)', true],
-            ['Softcopy resolusi tinggi', false],
-            ['Extra pax sehingga 6 orang', false],
-            ['1 drone shot percuma', true],
-        ]);
-
-        $extraFoto = Addon::updateOrCreate(
-            ['brand_id' => $brand->id, 'code' => 'extra-foto-10'],
-            ['name' => 'Extra 10 Gambar Edit', 'price_cents' => 5000, 'unit' => 'unit']
-        );
-        $albumTambahan = Addon::updateOrCreate(
-            ['brand_id' => $brand->id, 'code' => 'album-tambahan'],
-            ['name' => 'Album Cetak Tambahan', 'price_cents' => 8000, 'unit' => 'unit']
-        );
-        $extraPax = Addon::updateOrCreate(
-            ['brand_id' => $brand->id, 'code' => 'extra-pax'],
-            ['name' => 'Extra Pax (Keluarga)', 'price_cents' => 3000, 'unit' => 'pax', 'max_qty' => 10]
-        );
-        $drone = Addon::updateOrCreate(
-            ['brand_id' => $brand->id, 'code' => 'drone-shot'],
-            ['name' => 'Drone Shot', 'price_cents' => 15000, 'unit' => 'flat']
+        $extraTime = Addon::updateOrCreate(
+            ['brand_id' => $brand->id, 'code' => 'extra-30-minutes'],
+            ['name' => 'Extra 30 Minutes', 'price_cents' => 10000, 'unit' => 'unit']
         );
 
-        foreach ([$asas, $premium, $eksklusif] as $pkg) {
+        foreach ([$personal, $grouping] as $pkg) {
             $pkg->addons()->syncWithoutDetaching([
-                $extraFoto->id => ['sort_order' => 1],
-                $albumTambahan->id => ['sort_order' => 2],
-                $extraPax->id => ['sort_order' => 3],
-                $drone->id => ['sort_order' => 4, 'is_recommended' => $pkg->is($eksklusif)],
+                $extraTime->id => ['sort_order' => 1],
             ]);
         }
     }

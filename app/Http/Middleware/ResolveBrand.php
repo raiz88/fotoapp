@@ -44,7 +44,7 @@ class ResolveBrand
 
         app()->instance(Brand::class, $brand);
         View::share('brand', $brand);
-        app()->setLocale('ms');
+        app()->setLocale($brand->code === 'ceritaconvo' ? 'en' : 'ms');
 
         BrandScope::$enabled = true;
 

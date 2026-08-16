@@ -26,6 +26,11 @@ final class Money
         return new self($this->cents + $other->cents);
     }
 
+    public function subtract(Money $other): self
+    {
+        return new self($this->cents - $other->cents);
+    }
+
     public function __toString(): string
     {
         return $this->format();
