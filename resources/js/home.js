@@ -146,8 +146,68 @@ function initPackageImageModal() {
     });
 }
 
+function initBookingWizard() {
+    const step1 = document.getElementById('booking-step-1');
+    const step2 = document.getElementById('booking-step-2');
+    const nextBtn = document.getElementById('booking-next-btn');
+    const backBtn = document.getElementById('booking-back-btn');
+    const availabilityMsg = document.getElementById('booking-availability-msg');
+
+    if (!step1 || !step2 || !nextBtn) {
+        return;
+    }
+
+    nextBtn.addEventListener('click', async () => {
+        const packageId = document.getElementById('package_id').value;
+        const bookingDate = document.getElementById('booking_date').value;
+        const timeSlot = document.getElementById('time_slot').value;
+
+        if (!packageId || !bookingDate || !timeSlot) {
+            availabilityMsg.textContent = 'Please choose a package, date and time slot first.';
+            availabilityMsg.className = 'mt-3 text-xs text-red-400';
+            return;
+        }
+
+        nextBtn.disabled = true;
+        availabilityMsg.textContent = 'Checking availability…';
+        availabilityMsg.className = 'mt-3 text-xs text-fg/50';
+
+        try {
+            const response = await fetch(document.getElementById('booking-form').dataset.checkAvailabilityUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ booking_date: bookingDate, time_slot: timeSlot }),
+            });
+            const data = await response.json();
+
+            if (data.available) {
+                step1.classList.add('hidden');
+                step2.classList.remove('hidden');
+                availabilityMsg.textContent = '';
+            } else {
+                availabilityMsg.textContent = 'That date and time slot is already booked. Please choose another.';
+                availabilityMsg.className = 'mt-3 text-xs text-red-400';
+            }
+        } catch {
+            availabilityMsg.textContent = 'Could not check availability. Please try again.';
+            availabilityMsg.className = 'mt-3 text-xs text-red-400';
+        } finally {
+            nextBtn.disabled = false;
+        }
+    });
+
+    backBtn?.addEventListener('click', () => {
+        step2.classList.add('hidden');
+        step1.classList.remove('hidden');
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     mountHeroScene('home-hero-canvas', buildHeroScene);
     initPackageBookingLinks();
     initPackageImageModal();
+    initBookingWizard();
 });

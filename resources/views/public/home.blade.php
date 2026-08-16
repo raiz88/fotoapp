@@ -198,89 +198,115 @@
     </section>
 
     {{-- Booking --}}
+    @php
+        $bookingStep2 = $errors->has('customer_name') || $errors->has('customer_email') || $errors->has('customer_phone');
+    @endphp
     <section id="booking" class="relative mx-auto max-w-xl px-4 py-24">
         <div class="text-center" data-reveal>
             <p class="font-display text-xs font-semibold uppercase tracking-[0.3em] text-brand-primary">Booking</p>
             <h2 class="font-display mt-4 text-3xl font-bold text-fg md:text-4xl">Book Your Session</h2>
             <p class="mt-3 text-sm text-fg/50">
-                Pick a date and time slot first — we'll let you know right away if it's already taken.
+                Pick a package, date and time slot first — we'll let you know right away if it's already taken.
             </p>
         </div>
 
-        @if (session('booking_confirmed'))
-            <div class="mt-8 rounded-2xl border border-brand-primary/40 bg-brand-primary/10 px-5 py-4 text-center text-sm font-medium text-fg">
-                Your booking is confirmed! We'll reach out shortly to confirm the details.
-            </div>
-        @endif
-
-        <form method="POST" action="{{ route('booking.store') }}" class="glass-card glow-border mt-8 rounded-3xl p-8" data-reveal style="transition-delay: 120ms">
+        <form id="booking-form" method="POST" action="{{ route('booking.store') }}"
+              data-check-availability-url="{{ route('booking.check-availability') }}"
+              class="glass-card glow-border mt-8 rounded-3xl p-8" data-reveal style="transition-delay: 120ms">
             @csrf
 
-            <div>
-                <label for="customer_name" class="text-sm font-medium text-fg/80">Full Name</label>
-                <input type="text" name="customer_name" id="customer_name" required value="{{ old('customer_name') }}"
-                       class="mt-2 w-full rounded-xl border border-fg/10 bg-fg/5 px-4 py-2.5 text-sm text-fg focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/30">
-                @error('customer_name')
-                    <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
-                @enderror
+            <div id="booking-step-1" class="{{ $bookingStep2 ? 'hidden' : '' }}">
+                <div>
+                    <label for="package_id" class="text-sm font-medium text-fg/80">Package</label>
+                    <select name="package_id" id="package_id" required
+                            class="mt-2 w-full rounded-xl border border-fg/10 bg-fg/5 px-4 py-2.5 text-sm text-fg focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/30">
+                        <option value="" disabled {{ old('package_id') ? '' : 'selected' }}>Select a package</option>
+                        @foreach ($packages as $package)
+                            <option value="{{ $package->id }}" {{ (string) old('package_id') === (string) $package->id ? 'selected' : '' }}>
+                                {{ $package->name }} — {{ $package->price_cents->format() }} (deposit {{ $package->depositLabel() }})
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('package_id')
+                        <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="mt-5">
+                    <label for="booking_date" class="text-sm font-medium text-fg/80">Date</label>
+                    <input type="date" name="booking_date" id="booking_date" required value="{{ old('booking_date') }}"
+                           min="{{ now()->toDateString() }}"
+                           class="mt-2 w-full rounded-xl border border-fg/10 bg-fg/5 px-4 py-2.5 text-sm text-fg focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/30">
+                    @error('booking_date')
+                        <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="mt-5">
+                    <label for="time_slot" class="text-sm font-medium text-fg/80">Time Slot</label>
+                    <select name="time_slot" id="time_slot" required
+                            class="mt-2 w-full rounded-xl border border-fg/10 bg-fg/5 px-4 py-2.5 text-sm text-fg focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/30">
+                        <option value="" disabled {{ old('time_slot') ? '' : 'selected' }}>Select a time slot</option>
+                        @foreach ($timeSlots as $key => $label)
+                            <option value="{{ $key }}" {{ old('time_slot') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    @error('time_slot')
+                        <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <p id="booking-availability-msg" class="mt-3 text-xs"></p>
+
+                <button type="button" id="booking-next-btn"
+                        class="mt-7 w-full rounded-full bg-brand-primary py-3 font-semibold text-black shadow-[0_0_30px_-8px_var(--brand-primary)] transition hover:brightness-110">
+                    Next
+                </button>
             </div>
 
-            <div class="mt-5">
-                <label for="customer_phone" class="text-sm font-medium text-fg/80">Phone Number</label>
-                <input type="text" name="customer_phone" id="customer_phone" required value="{{ old('customer_phone') }}"
-                       class="mt-2 w-full rounded-xl border border-fg/10 bg-fg/5 px-4 py-2.5 text-sm text-fg focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/30">
-                @error('customer_phone')
-                    <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
-                @enderror
-            </div>
+            <div id="booking-step-2" class="{{ $bookingStep2 ? '' : 'hidden' }}">
+                <div>
+                    <label for="customer_name" class="text-sm font-medium text-fg/80">Full Name</label>
+                    <input type="text" name="customer_name" id="customer_name" required value="{{ old('customer_name') }}"
+                           class="mt-2 w-full rounded-xl border border-fg/10 bg-fg/5 px-4 py-2.5 text-sm text-fg focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/30">
+                    @error('customer_name')
+                        <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
 
-            <div class="mt-5">
-                <label for="booking_date" class="text-sm font-medium text-fg/80">Date</label>
-                <input type="date" name="booking_date" id="booking_date" required value="{{ old('booking_date') }}"
-                       min="{{ now()->toDateString() }}"
-                       class="mt-2 w-full rounded-xl border border-fg/10 bg-fg/5 px-4 py-2.5 text-sm text-fg focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/30">
-                @error('booking_date')
-                    <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
-                @enderror
-            </div>
+                <div class="mt-5">
+                    <label for="customer_email" class="text-sm font-medium text-fg/80">Email</label>
+                    <input type="email" name="customer_email" id="customer_email" required value="{{ old('customer_email') }}"
+                           class="mt-2 w-full rounded-xl border border-fg/10 bg-fg/5 px-4 py-2.5 text-sm text-fg focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/30">
+                    @error('customer_email')
+                        <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
 
-            <div class="mt-5">
-                <label for="time_slot" class="text-sm font-medium text-fg/80">Time Slot</label>
-                <select name="time_slot" id="time_slot" required
-                        class="mt-2 w-full rounded-xl border border-fg/10 bg-fg/5 px-4 py-2.5 text-sm text-fg focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/30">
-                    <option value="" disabled {{ old('time_slot') ? '' : 'selected' }}>Select a time slot</option>
-                    @foreach ($timeSlots as $key => $label)
-                        <option value="{{ $key }}" {{ old('time_slot') === $key ? 'selected' : '' }}>{{ $label }}</option>
-                    @endforeach
-                </select>
-                @error('time_slot')
-                    <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
-                @enderror
-            </div>
+                <div class="mt-5">
+                    <label for="customer_phone" class="text-sm font-medium text-fg/80">Phone Number</label>
+                    <input type="text" name="customer_phone" id="customer_phone" required value="{{ old('customer_phone') }}"
+                           class="mt-2 w-full rounded-xl border border-fg/10 bg-fg/5 px-4 py-2.5 text-sm text-fg focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/30">
+                    @error('customer_phone')
+                        <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
 
-            <div class="mt-5">
-                <label for="package_id" class="text-sm font-medium text-fg/80">Package</label>
-                <select name="package_id" id="package_id"
-                        class="mt-2 w-full rounded-xl border border-fg/10 bg-fg/5 px-4 py-2.5 text-sm text-fg focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/30">
-                    <option value="">Not sure yet</option>
-                    @foreach ($packages as $package)
-                        <option value="{{ $package->id }}" {{ (string) old('package_id') === (string) $package->id ? 'selected' : '' }}>
-                            {{ $package->name }} — {{ $package->price_cents->format() }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+                <div class="mt-5">
+                    <label for="notes" class="text-sm font-medium text-fg/80">Notes (optional)</label>
+                    <textarea name="notes" id="notes" rows="3"
+                              class="mt-2 w-full rounded-xl border border-fg/10 bg-fg/5 px-4 py-2.5 text-sm text-fg focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/30">{{ old('notes') }}</textarea>
+                </div>
 
-            <div class="mt-5">
-                <label for="notes" class="text-sm font-medium text-fg/80">Notes (optional)</label>
-                <textarea name="notes" id="notes" rows="3"
-                          class="mt-2 w-full rounded-xl border border-fg/10 bg-fg/5 px-4 py-2.5 text-sm text-fg focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/30">{{ old('notes') }}</textarea>
-            </div>
+                <button type="button" id="booking-back-btn" class="mt-7 text-sm font-medium text-fg/50 hover:text-fg">
+                    &larr; Back
+                </button>
 
-            <button type="submit"
-                    class="mt-7 w-full rounded-full bg-brand-primary py-3 font-semibold text-black shadow-[0_0_30px_-8px_var(--brand-primary)] transition hover:brightness-110">
-                Confirm Booking
-            </button>
+                <button type="submit"
+                        class="mt-3 w-full rounded-full bg-brand-primary py-3 font-semibold text-black shadow-[0_0_30px_-8px_var(--brand-primary)] transition hover:brightness-110">
+                    Proceed to Payment
+                </button>
+            </div>
         </form>
     </section>
 

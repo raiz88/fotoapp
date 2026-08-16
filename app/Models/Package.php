@@ -71,6 +71,15 @@ class Package extends Model
             : $this->depositPercent().'%';
     }
 
+    public function depositAmountCents(): int
+    {
+        if ($this->deposit_fixed_cents) {
+            return $this->deposit_fixed_cents->cents;
+        }
+
+        return (int) round($this->price_cents->cents * $this->depositPercent() / 100);
+    }
+
     public function whatsappMessage(): string
     {
         return "Saya berminat dengan {$this->name} ({$this->price_cents->format()}).";

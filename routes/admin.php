@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AddonController;
+use App\Http\Controllers\Admin\BookingController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PackageController;
 use Illuminate\Support\Facades\Route;
@@ -13,5 +14,10 @@ Route::middleware(['auth', 'active'])->name('admin.')->group(function () {
     Route::middleware('can:manage-packages')->group(function () {
         Route::resource('packages', PackageController::class);
         Route::resource('addons', AddonController::class);
+    });
+
+    Route::middleware('can:manage-bookings')->group(function () {
+        Route::resource('bookings', BookingController::class)->only(['index', 'show']);
+        Route::get('bookings/{booking}/invoice', [BookingController::class, 'invoice'])->name('bookings.invoice');
     });
 });
