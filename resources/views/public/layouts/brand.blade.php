@@ -30,24 +30,33 @@
 
 <body class="min-h-screen bg-ink text-fg/80 antialiased selection:bg-brand-primary/30">
 
+    @php($isCoreMemoryOnePage = $brand->code === 'corememory' && request()->routeIs('home'))
+
     <div class="grain-overlay"></div>
 
     <header class="fixed inset-x-0 top-0 z-30 border-b border-fg/5 bg-ink/70 backdrop-blur-md">
         <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-            <a href="{{ route('home') }}" class="font-display flex items-center gap-2 text-xl font-semibold tracking-tight text-fg">
+            <a href="{{ $isCoreMemoryOnePage ? '#home' : route('home') }}" class="font-display flex items-center gap-2 text-xl font-semibold tracking-tight text-fg">
                 <span class="inline-block h-2.5 w-2.5 rounded-full bg-brand-primary shadow-[0_0_12px_2px_var(--brand-primary)]"></span>
                 {{ $brand->name }}
             </a>
 
             <nav class="hidden items-center gap-8 text-sm font-medium text-fg/70 md:flex">
-                <a href="{{ route('home') }}" class="transition hover:text-fg">Laman Utama</a>
-                <a href="{{ route('packages.index') }}" class="transition hover:text-fg">Pakej</a>
-                <a href="{{ route('gallery', request()->query('design') ? ['design' => request()->query('design')] : []) }}" class="transition hover:text-fg">Galeri</a>
-                <a href="{{ route('contact') }}" class="transition hover:text-fg">Hubungi</a>
+                @if ($isCoreMemoryOnePage)
+                    <a href="#home" class="transition hover:text-fg">Laman Utama</a>
+                    <a href="#gallery" class="transition hover:text-fg">Galeri</a>
+                    <a href="#packages" class="transition hover:text-fg">Pakej</a>
+                    <a href="#contact" class="transition hover:text-fg">Hubungi</a>
+                @else
+                    <a href="{{ route('home') }}" class="transition hover:text-fg">Laman Utama</a>
+                    <a href="{{ route('packages.index') }}" class="transition hover:text-fg">Pakej</a>
+                    <a href="{{ route('gallery', request()->query('design') ? ['design' => request()->query('design')] : []) }}" class="transition hover:text-fg">Galeri</a>
+                    <a href="{{ route('contact') }}" class="transition hover:text-fg">Hubungi</a>
+                @endif
             </nav>
 
-            <a href="{{ $brand->whatsappUrl('Hai ' . $brand->name . ', saya nak tanya tentang pakej.') }}"
-               target="_blank" rel="noopener"
+            <a href="{{ $isCoreMemoryOnePage ? '#contact' : $brand->whatsappUrl('Hai ' . $brand->name . ', saya nak tanya tentang pakej.') }}"
+               @unless($isCoreMemoryOnePage) target="_blank" rel="noopener" @endunless
                class="hidden rounded-full bg-brand-primary px-5 py-2 text-sm font-semibold text-black shadow-[0_0_30px_-8px_var(--brand-primary)] transition hover:brightness-110 md:inline-block">
                 WhatsApp Kami
             </a>
@@ -60,11 +69,11 @@
         </div>
 
         <nav id="nav-menu" class="hidden border-t border-fg/5 px-4 py-3 text-fg/80 md:hidden">
-            <a href="{{ route('home') }}" class="block py-2">Laman Utama</a>
-            <a href="{{ route('packages.index') }}" class="block py-2">Pakej</a>
-            <a href="{{ route('gallery', request()->query('design') ? ['design' => request()->query('design')] : []) }}" class="block py-2">Galeri</a>
-            <a href="{{ route('contact') }}" class="block py-2">Hubungi</a>
-            <a href="{{ $brand->whatsappUrl('Hai ' . $brand->name . ', saya nak tanya tentang pakej.') }}" class="mt-2 block rounded-full bg-brand-primary px-4 py-2 text-center font-semibold text-black">
+            <a href="{{ $isCoreMemoryOnePage ? '#home' : route('home') }}" class="block py-2">Laman Utama</a>
+            <a href="{{ $isCoreMemoryOnePage ? '#gallery' : route('gallery') }}" class="block py-2">Galeri</a>
+            <a href="{{ $isCoreMemoryOnePage ? '#packages' : route('packages.index') }}" class="block py-2">Pakej</a>
+            <a href="{{ $isCoreMemoryOnePage ? '#contact' : route('contact') }}" class="block py-2">Hubungi</a>
+            <a href="{{ $isCoreMemoryOnePage ? '#contact' : $brand->whatsappUrl('Hai ' . $brand->name . ', saya nak tanya tentang pakej.') }}" class="mt-2 block rounded-full bg-brand-primary px-4 py-2 text-center font-semibold text-black">
                 WhatsApp Kami
             </a>
         </nav>
@@ -72,7 +81,41 @@
 
     <main class="pt-16">
         @yield('content')
+
+        @if ($isCoreMemoryOnePage && in_array(request('design'), ['garden', 'midnight'], true))
+            @include('public.partials.corememory-packages', ['variant' => request('design')])
+        @endif
     </main>
+
+    @if ($isCoreMemoryOnePage)
+        <script>
+            (() => {
+                const sections = document.querySelectorAll('main > section');
+                const design = new URLSearchParams(window.location.search).get('design') || 'editorial';
+                const galleryIndex = design === 'editorial' ? 1 : 2;
+                const contact = document.getElementById('rsvp');
+
+                if (sections[0]) sections[0].id = 'home';
+                if (sections[galleryIndex]) sections[galleryIndex].id = 'gallery';
+
+                if (contact) {
+                    contact.id = 'contact';
+                    const legacyAnchor = document.createElement('span');
+                    legacyAnchor.id = 'rsvp';
+                    legacyAnchor.className = 'absolute -top-20';
+                    contact.prepend(legacyAnchor);
+                    const packageSection = document.getElementById('packages');
+                    if (packageSection && contact.compareDocumentPosition(packageSection) & Node.DOCUMENT_POSITION_FOLLOWING) {
+                        contact.before(packageSection);
+                    }
+                }
+
+                if (window.location.hash) {
+                    requestAnimationFrame(() => document.querySelector(window.location.hash)?.scrollIntoView());
+                }
+            })();
+        </script>
+    @endif
 
     <footer class="relative border-t border-fg/5 bg-ink-raised">
         <div class="mx-auto max-w-6xl px-4 py-14 text-sm text-fg/50">
