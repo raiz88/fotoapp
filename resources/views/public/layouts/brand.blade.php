@@ -42,7 +42,7 @@
             <nav class="hidden items-center gap-8 text-sm font-medium text-fg/70 md:flex">
                 <a href="{{ route('home') }}" class="transition hover:text-fg">Laman Utama</a>
                 <a href="{{ route('packages.index') }}" class="transition hover:text-fg">Pakej</a>
-                <a href="{{ route('gallery') }}" class="transition hover:text-fg">Galeri</a>
+                <a href="{{ route('gallery', request()->query('design') ? ['design' => request()->query('design')] : []) }}" class="transition hover:text-fg">Galeri</a>
                 <a href="{{ route('contact') }}" class="transition hover:text-fg">Hubungi</a>
             </nav>
 
@@ -62,7 +62,7 @@
         <nav id="nav-menu" class="hidden border-t border-fg/5 px-4 py-3 text-fg/80 md:hidden">
             <a href="{{ route('home') }}" class="block py-2">Laman Utama</a>
             <a href="{{ route('packages.index') }}" class="block py-2">Pakej</a>
-            <a href="{{ route('gallery') }}" class="block py-2">Galeri</a>
+            <a href="{{ route('gallery', request()->query('design') ? ['design' => request()->query('design')] : []) }}" class="block py-2">Galeri</a>
             <a href="{{ route('contact') }}" class="block py-2">Hubungi</a>
             <a href="{{ $brand->whatsappUrl('Hai ' . $brand->name . ', saya nak tanya tentang pakej.') }}" class="mt-2 block rounded-full bg-brand-primary px-4 py-2 text-center font-semibold text-black">
                 WhatsApp Kami

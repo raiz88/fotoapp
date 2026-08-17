@@ -20,11 +20,35 @@ class HomeController extends Controller
             ->with('items')
             ->get();
 
-        return view('public.home', ['brand' => $brand, 'packages' => $packages]);
+        $design = $request->string('design', 'editorial')->toString();
+        $coreMemoryViews = [
+            'editorial' => 'public.home-corememory',
+            'garden' => 'public.home-corememory-garden',
+            'midnight' => 'public.home-corememory-midnight',
+        ];
+
+        $view = $brand->code === 'corememory'
+            ? ($coreMemoryViews[$design] ?? $coreMemoryViews['editorial'])
+            : 'public.home';
+
+        return view($view, ['brand' => $brand, 'packages' => $packages, 'design' => $design]);
     }
 
-    public function gallery(): View
+    public function gallery(Request $request): View
     {
-        return view('public.gallery');
+        /** @var Brand $brand */
+        $brand = app(Brand::class);
+        $design = $request->string('design', 'editorial')->toString();
+        $views = [
+            'editorial' => 'public.gallery-corememory-editorial',
+            'garden' => 'public.gallery-corememory-garden',
+            'midnight' => 'public.gallery-corememory-midnight',
+        ];
+
+        $view = $brand->code === 'corememory'
+            ? ($views[$design] ?? $views['editorial'])
+            : 'public.gallery';
+
+        return view($view, ['brand' => $brand, 'design' => $design]);
     }
 }
