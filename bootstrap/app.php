@@ -51,6 +51,9 @@ return Application::configure(basePath: dirname(__DIR__))
             PreventRequestForgery::class,
             SubstituteBindings::class,
         ]);
+
+        // ToyyibPay calls this server-to-server with no CSRF token to give.
+        $middleware->validateCsrfTokens(except: ['booking/webhook']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

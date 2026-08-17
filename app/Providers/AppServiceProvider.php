@@ -24,5 +24,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('view-profit', fn (User $user) => $user->role === User::ROLE_OWNER);
         Gate::define('manage-packages', fn (User $user) => in_array($user->role, [User::ROLE_OWNER, User::ROLE_ADMIN], true));
         Gate::define('manage-users', fn (User $user) => $user->role === User::ROLE_OWNER);
+        Gate::define('manage-bookings', fn (User $user) => in_array($user->role, User::ROLES, true));
     }
 }

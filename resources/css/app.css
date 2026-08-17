@@ -29,19 +29,26 @@
     --color-fg: var(--fg, #ffffff);
 }
 
+/*
+ * Deliberately NOT setting --brand-primary/--brand-secondary here: the
+ * per-request inline <style> block in brand.blade.php is the only source
+ * of truth for those two (see the @theme comment above). Redefining them
+ * on :root would win the cascade over that inline block (same specificity,
+ * later in the document) and silently override every brand's colors back
+ * to whatever hardcoded default sits here — exactly the bug this comment
+ * is here to stop someone from reintroducing.
+ */
 :root {
-    --brand-primary: #a855f7;
-    --brand-secondary: #22d3ee;
     --ink: #06050b;
     --ink-raised: #0e0c17;
     --fg: #ffffff;
 }
 
-/* CeritaConvo: dark & dramatic — cool, slightly purple-tinted black canvas
-   with light text. */
+/* CeritaConvo: yellow & black — neutral black canvas (no color tint) with
+   a bright yellow accent, light text. */
 [data-brand='ceritaconvo'] {
-    --ink: #08050f;
-    --ink-raised: #120a1f;
+    --ink: #0a0a0a;
+    --ink-raised: #171412;
     --fg: #ffffff;
 }
 
@@ -117,7 +124,7 @@ header {
 
 .glow-border {
     border: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
-    transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .glow-border:hover {
@@ -149,4 +156,46 @@ header {
 [data-reveal].is-visible {
     opacity: 1;
     transform: translateY(0);
+}
+
+/* Vertical event timeline (e.g. a day's itinerary) — a brand-primary-colored
+   line with one dot per event, centered on desktop and left-aligned on
+   mobile. Themeable for free via --fg/--brand-primary, same as glass-card. */
+.timeline {
+    position: relative;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    width: 2px;
+    background: color-mix(in srgb, var(--brand-primary) 40%, transparent);
+}
+
+@media (min-width: 768px) {
+    .timeline::before {
+        left: 50%;
+        transform: translateX(-1px);
+    }
+}
+
+.timeline-dot {
+    position: absolute;
+    left: 0.5rem;
+    top: 0.35rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 9999px;
+    background: var(--brand-primary);
+    box-shadow: 0 0 0 4px var(--color-ink), 0 0 0 5px color-mix(in srgb, var(--brand-primary) 50%, transparent);
+    transform: translateX(-50%);
+}
+
+@media (min-width: 768px) {
+    .timeline-dot {
+        left: 50%;
+    }
 }
