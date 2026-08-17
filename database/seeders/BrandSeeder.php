@@ -76,5 +76,9 @@ class BrandSeeder extends Seeder
                 'is_active' => true,
             ]
         );
+
+        // CeritaConvo is no longer a public website; keep any legacy record
+        // inactive so existing databases cannot expose it.
+        Brand::where('code', 'ceritaconvo')->update(['is_active' => false]);
     }
 }

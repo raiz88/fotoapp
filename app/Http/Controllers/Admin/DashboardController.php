@@ -12,7 +12,7 @@ class DashboardController extends Controller
 {
     public function __invoke(): View
     {
-        $brands = Brand::withCount(['packages', 'addons'])->orderBy('name')->get();
+        $brands = Brand::where('is_active', true)->withCount(['packages', 'addons'])->orderBy('name')->get();
 
         return view('admin.dashboard', [
             'brands' => $brands,

@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
-use App\Models\Booking;
 use App\Models\Brand;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         /** @var Brand $brand */
         $brand = app(Brand::class);
@@ -26,9 +26,7 @@ class HomeController extends Controller
             'midnight' => 'public.home-corememory-midnight',
         ];
 
-        $view = $brand->code === 'corememory'
-            ? ($coreMemoryViews[$design] ?? $coreMemoryViews['editorial'])
-            : 'public.home';
+        $view = $coreMemoryViews[$design] ?? $coreMemoryViews['editorial'];
 
         return view($view, ['brand' => $brand, 'packages' => $packages, 'design' => $design]);
     }
@@ -44,15 +42,8 @@ class HomeController extends Controller
             'midnight' => 'public.gallery-corememory-midnight',
         ];
 
-        $view = $brand->code === 'corememory'
-            ? ($views[$design] ?? $views['editorial'])
-            : 'public.gallery';
+        $view = $views[$design] ?? $views['editorial'];
 
         return view($view, ['brand' => $brand, 'design' => $design]);
-        return view('public.home', [
-            'brand' => $brand,
-            'packages' => $packages,
-            'timeSlots' => Booking::SLOTS,
-        ]);
     }
 }

@@ -22,7 +22,7 @@ class PackageController extends Controller
     {
         return view('admin.packages.form', [
             'package' => new Package,
-            'brands' => Brand::orderBy('name')->get(),
+            'brands' => Brand::where('is_active', true)->orderBy('name')->get(),
         ]);
     }
 
@@ -37,7 +37,7 @@ class PackageController extends Controller
     {
         return view('admin.packages.form', [
             'package' => $package,
-            'brands' => Brand::orderBy('name')->get(),
+            'brands' => Brand::where('is_active', true)->orderBy('name')->get(),
         ]);
     }
 

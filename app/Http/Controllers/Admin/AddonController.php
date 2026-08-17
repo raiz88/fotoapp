@@ -22,7 +22,7 @@ class AddonController extends Controller
     {
         return view('admin.addons.form', [
             'addon' => new Addon,
-            'brands' => Brand::orderBy('name')->get(),
+            'brands' => Brand::where('is_active', true)->orderBy('name')->get(),
         ]);
     }
 
@@ -37,7 +37,7 @@ class AddonController extends Controller
     {
         return view('admin.addons.form', [
             'addon' => $addon,
-            'brands' => Brand::orderBy('name')->get(),
+            'brands' => Brand::where('is_active', true)->orderBy('name')->get(),
         ]);
     }
 

@@ -11,7 +11,6 @@ class PackageSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->seedCeritaConvo();
         $this->seedCoreMemory();
     }
 
